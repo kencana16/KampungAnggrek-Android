@@ -21,7 +21,7 @@ import java.util.List;
 public class ProdukAdapter extends RecyclerView.Adapter<ProdukAdapter.ProdukViewHolder> implements Filterable {
     //initial list
     private static ArrayList<Produk> listBarang;
-    private static ArrayList<Produk> listBarangfull;
+    protected static ArrayList<Produk> listBarangfull = new ArrayList<>();
     Context context;
     private ItemClickListener clickListener;
 
@@ -29,11 +29,9 @@ public class ProdukAdapter extends RecyclerView.Adapter<ProdukAdapter.ProdukView
         void onClick(View view, int position);
     }
 
-    public ProdukAdapter(ArrayList<Produk> dataList, Context context)
+    public ProdukAdapter(ArrayList<Produk> dataList)
     {
-        this.context=context;
-        this.listBarang = dataList;
-        this.listBarangfull = dataList;;
+        listBarang = dataList;
     }
 
     //Mengatur Inflater
@@ -119,6 +117,7 @@ public class ProdukAdapter extends RecyclerView.Adapter<ProdukAdapter.ProdukView
         //fungsi realtime searching
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
+            Log.d("list produk", listBarang.toString());
             Log.d("list produk full", listBarangfull.toString());
             listBarang.clear();
             listBarang.addAll((List)results.values);

@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
         GridLayoutManager layoutManager=new GridLayoutManager(this,2);
         mRecyclerview.setLayoutManager(layoutManager);
-        produkadapter = new ProdukAdapter(mItems,this);
+        produkadapter = new ProdukAdapter(mItems);
         mRecyclerview.setAdapter(produkadapter);
 
     }
@@ -90,18 +90,18 @@ public class MainActivity extends AppCompatActivity {
                         {
                             try {
                                 JSONObject data = response.getJSONObject(i);
-                                Produk md = new Produk(
-                                        data.getString("kd_barang"),
-                                        data.getString("nm_barang"),
-                                        data.getString("satuan"),
-                                        data.getString("deskripsi"),
-                                        data.getString("harga"),
-                                        data.getString("harga_beli"),
-                                        data.getString("stok"),
-                                        data.getString("stok_min"),
-                                        data.getString("gambar")
-                                );
+                                Produk md = new Produk();
+                                md.setKode(data.getString("kd_barang"));
+                                md.setNama(data.getString("nm_barang"));
+                                md.setSatuan(data.getString("satuan"));
+                                md.setDeskripsi(data.getString("deskripsi"));
+                                md.setHarga(data.getInt("harga"));
+                                md.setHarga_beli(data.getInt("harga_beli"));
+                                md.setStok(data.getInt("stok"));
+                                md.setStok_min(data.getInt("stok_min"));
+                                md.setImg(data.getString("gambar"));
                                 mItems.add(md);
+                                ProdukAdapter.listBarangfull.add(md);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -116,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("volley", "error : " + error.getMessage());
                     }
                 });
+
         com.kencana.kampunganggrek.Util.AppController.getInstance().addToRequestQueue(reqData);
     }
 
