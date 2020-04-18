@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.kencana.kampunganggrek.MainActivity">
+    <item android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_white_24dp"
+        android:title="CariBarang"
+        app:showAsAction="collapseActionView|ifRoom"
+        app:actionViewClass="androidx.appcompat.widget.SearchView" />
+    <item android:id="@+id/action_settings"
+        android:title="Call Center"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+    <item android:id="@+id/action_maps"
+        android:title="SMS Center"
+        android:orderInCategory="200"
+        app:showAsAction="never" />
+    <item android:id="@+id/action_call"
+        android:title="Lokasi"
+        android:orderInCategory="300"
+        app:showAsAction="never" />
+    <item android:id="@+id/action_sms"
+        android:title="Update Profil"
+        android:orderInCategory="400"
+        app:showAsAction="never" />
+</menu>
