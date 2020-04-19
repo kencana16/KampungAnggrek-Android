@@ -26,23 +26,76 @@
                 android:id="@+id/v_flipper"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:layout_centerHorizontal="true"/>
+                android:layout_centerHorizontal="true"
+                android:foreground="@drawable/fg_gradient"/>
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"/>
+                app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"
+                android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"/>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="50dp"
         tools:listitem="@layout/list_item"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="2"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
+    <View
+        android:id="@+id/shadow"
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:background="@drawable/shape_gradient_top_shadow"
+        app:layout_anchor="@id/bs_ll" />
+    <LinearLayout
+        android:id="@+id/bs_ll"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="340dp"
+        app:behavior_hideable="false"
+        app:behavior_peekHeight="50dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+        >
 
+        <RelativeLayout
+            android:id="@+id/bs_colapse"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="#fff">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total Pembelian :"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="10dp"
+                android:textSize="20sp"/>
+            <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="10dp"
+            android:textSize="20sp"
+            tools:text="Rp. 0"/>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:background="#fff"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:src="@drawable/banner4"
+                />
+        </LinearLayout>
+    </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
