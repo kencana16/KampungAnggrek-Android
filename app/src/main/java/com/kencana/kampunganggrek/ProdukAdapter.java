@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,9 +30,10 @@ public class ProdukAdapter extends RecyclerView.Adapter<ProdukAdapter.ProdukView
         void onClick(View view, int position);
     }
 
-    public ProdukAdapter(ArrayList<Produk> dataList)
+    public ProdukAdapter(ArrayList<Produk> dataList, Context context)
     {
-        listBarang = dataList;
+        this.context=context;
+        this.listBarang = dataList;
     }
 
     //Mengatur Inflater
@@ -46,13 +48,16 @@ public class ProdukAdapter extends RecyclerView.Adapter<ProdukAdapter.ProdukView
     //Menampilkan Data pada tampilan cardview
     @Override
     public void onBindViewHolder(final ProdukViewHolder holder, int position){
+        DecimalFormat decimalFormat = new DecimalFormat("#,##0");
+
         holder.txtNama.setText(listBarang.get(position).getNama());
         holder.txtDeskripsi.setText(listBarang.get(position).getDeskripsi());
-        holder.txtHarga.setText("Rp. "+listBarang.get(position).getHarga().toString());
+        holder.txtHarga.setText("Rp. "+decimalFormat.format(listBarang.get(position).getHarga()));
         Glide.with(holder.itemView.getContext()) //konteks bisa didapat dari activity yang sedang berjalan
                 .load(listBarang.get(position).getImg()) // mengambil data dengan cara "list.get(position)" mendapatkan isi berupa objek Menu. kemudian "Menu.geturlGambar"
                 .thumbnail(0.5f) // resize gambar menjadi setengahnya
                 .into(holder.icon); // mengisikan ke imageView
+        Log.d("gambar : ","listBarang.get(position).getImg()");
     }
 
     //mengitung jumlah data yang akan ditampilkan
@@ -61,6 +66,9 @@ public class ProdukAdapter extends RecyclerView.Adapter<ProdukAdapter.ProdukView
         return listBarang.size();
     }
 
+    public void setClickListener(ItemClickListener clickListener) {
+        this.clickListener = clickListener;
+    }
     public class ProdukViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView txtNama, txtHarga, txtDeskripsi;
         private ImageView icon;

@@ -3,10 +3,13 @@ package com.kencana.kampunganggrek;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import androidx.appcompat.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
@@ -21,6 +24,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
@@ -28,18 +32,24 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.button.MaterialButton;
+import com.kencana.kampunganggrek.Util.AppController;
 import com.kencana.kampunganggrek.Util.ServerAPI;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.kencana.kampunganggrek.LoginActivity.TAG_USERNAME;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ProdukAdapter.ItemClickListener {
 
     Toast toast;
     String username;
@@ -47,16 +57,20 @@ public class MainActivity extends AppCompatActivity {
 
     androidx.appcompat.widget.Toolbar toolbar;
     ViewFlipper v_flipper;
-    int images[] = {R.drawable.banner, R.drawable.banner1, R.drawable.banner2, R.drawable.banner3,  R.drawable.banner4, R.drawable.banner5};
+    int images[] = {R.drawable.banner, R.drawable.banner1, R.drawable.banner2, R.drawable.banner3};
     ProgressDialog pd;
     ArrayList<Produk> mItems = new ArrayList<>();
     private ProdukAdapter produkadapter;
+    private CartAdapter cartAdapter;
     RecyclerView mRecyclerview;
+    RecyclerView cartRecycler;
 
     LinearLayout bottomSheetLayout;
     RelativeLayout colapseBottomSheet;
     BottomSheetBehavior bottomSheetBehavior;
 
+    MaterialButton btn_checkout, btn_clearcart;
+    ArrayList<Produk> cart = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +93,8 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerview = (RecyclerView) findViewById(R.id.recycler_view);
         mRecyclerview.setHasFixedSize(true);
+        cartRecycler = (RecyclerView) findViewById(R.id.rc_cart);
+        cartRecycler.setHasFixedSize(true);
 
         //mengambil data dari API
         loadJson();
@@ -86,24 +102,42 @@ public class MainActivity extends AppCompatActivity {
         //set recycler view 2 kolom
         GridLayoutManager layoutManager=new GridLayoutManager(this,2);
         mRecyclerview.setLayoutManager(layoutManager);
-        produkadapter = new ProdukAdapter(mItems); //memanggil adapter
+        produkadapter = new ProdukAdapter(mItems, this); //memanggil adapter
         mRecyclerview.setAdapter(produkadapter);
+        produkadapter.setClickListener(this);
 
-        // get the bottom sheet view
-        bottomSheetLayout = findViewById(R.id.bs_ll);
-        colapseBottomSheet = findViewById(R.id.bs_colapse);
-        // init the bottom sheet behavior
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
-        //ketika bottomsheet di klik maka akan expand
-        colapseBottomSheet.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                } else {
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        cartRecycler.setLayoutManager(new LinearLayoutManager(this));
+        cartAdapter = new CartAdapter(cart);
+        cartRecycler.setAdapter(cartAdapter);
+        produkadapter.setClickListener(this);
+
+        btn_checkout = findViewById(R.id.btn_checkout);
+        btn_clearcart = findViewById(R.id.btn_clearcart);
+
+        btn_clearcart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cart.clear();
+                cartAdapter.notifyDataSetChanged();
+                getTotal();
+                for(int i=0; i< mItems.size(); i++ ){
+                    mItems.get(i).setJmlBeli(0);
                 }
             }
         });
+        btn_checkout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(cart.isEmpty()){
+                    Toast.makeText(MainActivity.this,"Pilih barang terlebih dahulu", Toast.LENGTH_LONG).show();
+                }else{
+                    transaksi();
+                }
+            }
+        });
+
+        //inisialisasi bottomsheet
+        initBottomsheet();
     }
 
     //fungsi utnuk slide show
@@ -113,9 +147,11 @@ public class MainActivity extends AppCompatActivity {
         v_flipper.addView(imageView);
         v_flipper.setFlipInterval(5000);
         v_flipper.setAutoStart(true);
-        v_flipper.setOutAnimation(this,android.R.anim.slide_out_right);
         v_flipper.setInAnimation(this,android.R.anim.slide_in_left);
+        v_flipper.setOutAnimation(this,android.R.anim.slide_out_right);
     }
+
+
 
     //fungsi ambil data dari API
     private void loadJson(){
@@ -162,6 +198,133 @@ public class MainActivity extends AppCompatActivity {
         com.kencana.kampunganggrek.Util.AppController.getInstance().addToRequestQueue(reqData);
     }
 
+    //menjumlah total harga
+    public void getTotal()
+    {
+        int tot=0;
+        TextView txtTot=(TextView) findViewById(R.id.totalHarga);
+        DecimalFormat decimalFormat = new DecimalFormat("#,##0");
+        for(int i=0; i<cart.size();i++){
+            tot += (cart.get(i).getHarga() * cart.get(i).getJmlBeli());
+            Log.d("vvvv", cart.get(i).getHarga()+" aaa  "+ cart.get(i).getJmlBeli());
+        }
+        txtTot.setText("Rp. "+decimalFormat.format(tot));
+    }
+
+    //fungsi klik pada daftar barang
+    public void onClick(View view, int position) {
+            final Produk produk = mItems.get(position);
+            switch (view.getId()) {
+                case R.id.img_card:
+                    produk.setJmlBeli(produk.getJmlBeli()+1);
+                    cart.clear();
+                    for(int i=0; i< mItems.size(); i++ ){
+                        if(mItems.get(i).getJmlBeli()>0){
+                            cart.add(mItems.get(i));
+                        }
+                    }
+                    getTotal();
+                    cartAdapter.notifyDataSetChanged();
+                    return;
+                default:
+                    Intent intent = new Intent(MainActivity.this, DetailProdukActivity.class);
+                    intent.putExtra("gambar", produk.getImgName());
+                    intent.putExtra("nama", produk.getNama());
+                    intent.putExtra("harga", produk.getHarga());
+                    intent.putExtra("stok", produk.getStok());
+                    intent.putExtra("satuan", produk.getSatuan());
+                    intent.putExtra("deskripsi", produk.getDeskripsi());
+                    startActivity(intent);
+                    break;
+            }
+    }
+
+    public void transaksi(){
+        pd.setMessage("Proses Checkout");
+        pd.setCancelable(false);
+        pd.show();
+        StringRequest strReq = new
+                StringRequest(Request.Method.POST, ServerAPI.URL_JUAL,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            pd.cancel();
+                            try {
+                                JSONObject res = new JSONObject(response);
+                                for (int i = 0; i < cart.size();i++) {
+                                    createDetailJual(res.getString("no_nota"), cart.get(i).getKode(), String.valueOf(cart.get(i).getHarga()), String.valueOf(cart.get(i).getJmlBeli()));
+                                }
+                                toast.setText(res.getString("message"));
+                                toast.show();
+                                cart.clear();
+                                cartAdapter.notifyDataSetChanged();
+                                getTotal();
+                                for(int i=0; i< mItems.size(); i++ ){
+                                    mItems.get(i).setJmlBeli(0);
+                                }
+                            } catch (JSONException e) {
+                                    e.printStackTrace();
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            pd.cancel();
+                            toast.setText("Gagal Checkout");
+                            toast.show();
+                        }
+                    }) {
+                    @Override
+                    protected Map<String, String> getParams() {
+                        // Posting parameters to nota
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("username", username);
+
+                        double total = 0;
+                        for(int i=0; i<cart.size();i++){total += (cart.get(i).getHarga() * cart.get(i).getJmlBeli());}
+                        params.put("total", Double.toString(total));
+                        return params;
+                    }
+                };
+        com.kencana.kampunganggrek.Util.AppController.getInstance().addToRequestQueue(strReq);
+    };
+
+    private void createDetailJual(final String no_nota, final String kode, final String harga, final String jumlah) {
+
+        StringRequest strReq = new
+                StringRequest(Request.Method.POST, ServerAPI.URL_DETAILJUAL,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                try {
+                                    JSONObject res = new JSONObject(response);
+                                    Log.d("kode", res.getString("message"));
+                                    Log.d("kode", res.getString("query"));
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                            }
+                        }) {
+                    @Override
+                    protected Map<String, String> getParams() {
+                        // Posting parameters to detail nota
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("no_nota", no_nota);
+                        params.put("kode", kode);
+                        params.put("harga", harga);
+                        params.put("jumlah", jumlah);
+                        return params;
+                    }
+                };
+        com.kencana.kampunganggrek.Util.AppController.getInstance().addToRequestQueue(strReq);
+    }
+
     //fungsi untuk tombol menu
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -185,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return true;
             case R.id.action_profile:
-                Toast.makeText(this,"anda menekan profile", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(MainActivity.this,UpdateUserActivity.class));
                 return true;
             case R.id.action_logout:
                 SharedPreferences.Editor editor = sharedpreferences.edit();
@@ -226,6 +389,25 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    //method inisialisasi botttomsheet
+    private void initBottomsheet() {
+        // get the bottom sheet view
+        bottomSheetLayout = findViewById(R.id.bs_ll);
+        colapseBottomSheet = findViewById(R.id.bs_colapse);
+        // init the bottom sheet behavior
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
+        //ketika bottomsheet di klik maka akan expand
+        colapseBottomSheet.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                } else {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+            }
+        });
+    }
+
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event){
@@ -241,5 +423,37 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return super.dispatchTouchEvent(event);
+    }
+
+    @Override
+    public void onBackPressed() {
+        AlertDialog.Builder builder = new
+                AlertDialog.Builder(this);
+        builder.setCancelable(false);
+        builder.setMessage("Apakah kamu ingin keluar?");
+        builder.setPositiveButton("Iya", new
+                DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int
+                            which) {
+                        //if user pressed "yes", then he is allowed to exit from application
+                        Intent intent = new Intent(Intent.ACTION_MAIN);
+                        intent.addCategory(Intent.CATEGORY_HOME);
+                        startActivity(intent);
+                        int pid = android.os.Process.myPid();
+                        android.os.Process.killProcess(pid);
+                    }
+                });
+        builder.setNegativeButton("Tidak", new
+                DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int
+                            which) {
+                        //if user select "No", just cancel this dialog and continue with app
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 }

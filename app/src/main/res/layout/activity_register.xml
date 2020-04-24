@@ -82,13 +82,13 @@
             app:passwordToggleEnabled="true"
             app:startIconDrawable="@drawable/ic_lock_outline_black_24dp"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/ti_confpass_signup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Konfirmasi Kata Sandi"
-                android:inputType="textPassword">
-            </com.google.android.material.textfield.TextInputEditText>
+                android:inputType="textPassword"></com.google.android.material.textfield.TextInputEditText>
 
         </com.google.android.material.textfield.TextInputLayout>
 

@@ -40,7 +40,6 @@ public class LoginActivity extends AppCompatActivity {
     TextView signup;
 
     ProgressDialog pDialog;
-    Intent intent;
 
     int success;
     ConnectivityManager conMgr;
@@ -95,7 +94,7 @@ public class LoginActivity extends AppCompatActivity {
         signin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
+
                 String username = ti_user.getText().toString();
                 String password = ti_pass.getText().toString();
 
@@ -139,6 +138,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
 
@@ -161,12 +161,14 @@ public class LoginActivity extends AppCompatActivity {
                     // Check for error node in json
                     if (success == 1) {
                         String username = jObj.getString(TAG_USERNAME);
+                        String kd_konsumen = jObj.getString("kode_konsumen");
                         Log.e("Berhasil Masuk!", jObj.toString());
                         Toast.makeText(getApplicationContext(), jObj.getString(TAG_MESSAGE), Toast.LENGTH_LONG).show();
                         // menyimpan login ke session
                         SharedPreferences.Editor editor = sharedpreferences.edit();
                         editor.putBoolean(session_status,true);
                         editor.putString(TAG_USERNAME, username);
+                        editor.putString("kode_konsumen", kd_konsumen);
                         editor.commit();
                         // Memanggil main activity
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);

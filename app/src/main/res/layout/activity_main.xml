@@ -25,7 +25,7 @@
             <ViewFlipper
                 android:id="@+id/v_flipper"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="150dp"
                 android:layout_centerHorizontal="true"
                 android:foreground="@drawable/fg_gradient"/>
             <com.google.android.material.appbar.MaterialToolbar
@@ -77,25 +77,53 @@
                 android:layout_marginStart="10dp"
                 android:textSize="20sp"/>
             <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="10dp"
-            android:textSize="20sp"
-            tools:text="Rp. 0"/>
+                android:id="@+id/totalHarga"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"
+                android:textSize="20sp"
+                android:text="Rp. 0"/>
         </RelativeLayout>
 
         <LinearLayout
-            android:background="#fff"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <ImageView
+            android:layout_height="match_parent"
+            android:background="@color/btLight">
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center"
-                android:src="@drawable/banner4"
-                />
+                android:paddingHorizontal="10dp">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:paddingTop="10dp"
+                    android:paddingBottom="60dp"
+                    android:id="@+id/rc_cart"
+                    android:layout_width="match_parent"
+                    android:layout_height="fill_parent"
+                    tools:listitem="@layout/cart_item"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true">
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_clearcart"
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:layout_weight="1"
+                        android:text="Clear"
+                        app:backgroundTint="@color/pink" />
+                    <com.google.android.material.button.MaterialButton
+                        android:layout_marginStart="10dp"
+                        android:id="@+id/btn_checkout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="50dp"
+                        android:layout_weight="1"
+                        android:text="Checkout"
+                        />
+                </LinearLayout>
+            </RelativeLayout>
         </LinearLayout>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -6,9 +6,6 @@
   <component name="ProjectType">
     <option name="id" value="Android" />
   </component>
-  <component name="TerminalProjectOptionsProvider">
-    <option name="myStartingDirectory" value="D:\Project\Android Studio" />
-  </component>
   <component name="masterDetails">
     <states>
       <state key="ScopeChooserConfigurable.UI">

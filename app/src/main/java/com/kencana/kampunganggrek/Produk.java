@@ -10,6 +10,9 @@ public class Produk {
     private Integer stok;
     private Integer stok_min;
     private String img;
+
+    private Integer jmlBeli=0;
+
     public Produk(){}
     public Produk(String kode, String nama, String satuan, String deskripsi, String harga, String harga_beli, String stok, String stok_min, String img) {
         this.kode = kode;
@@ -91,9 +94,18 @@ public class Produk {
         this.img = img;
     }
 
-    public String getImg() { return "http://192.168.43.168/E-COMERCEE/Kampung_Anggrek/assets/images/"+img;  }
+    public String getImg() { return "https://kampung-anggrek.000webhostapp.com/assets/images/"+img;  }
+    public String getImgName() { return img;  }
 
     public String toString(){
         return "\nkode : " + kode + " Nama : " + nama + " Harga : " + harga +"\n";
+    }
+
+    public Integer getJmlBeli() {
+        return jmlBeli;
+    }
+
+    public void setJmlBeli(Integer jmlBeli) {
+        this.jmlBeli = jmlBeli;
     }
 }
