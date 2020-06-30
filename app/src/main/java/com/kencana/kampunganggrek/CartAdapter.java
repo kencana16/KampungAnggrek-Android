@@ -1,10 +1,8 @@
 package com.kencana.kampunganggrek;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -28,7 +26,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ProdukViewHold
     @Override
     public ProdukViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        View view = layoutInflater.inflate(R.layout.cart_item , parent, false);
+        View view = layoutInflater.inflate(R.layout.item_cart, parent, false);
         return new ProdukViewHolder(view);
     }
 

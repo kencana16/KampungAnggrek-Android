@@ -35,8 +35,8 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
-import com.kencana.kampunganggrek.Util.AppController;
 import com.kencana.kampunganggrek.Util.ServerAPI;
+import com.kencana.kampunganggrek.cekongkir.OngkirActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,16 +52,16 @@ import static com.kencana.kampunganggrek.LoginActivity.TAG_USERNAME;
 public class MainActivity extends AppCompatActivity implements ProdukAdapter.ItemClickListener {
 
     Toast toast;
-    String username;
+    public static String username;
     SharedPreferences sharedpreferences;
 
     androidx.appcompat.widget.Toolbar toolbar;
     ViewFlipper v_flipper;
     int images[] = {R.drawable.banner, R.drawable.banner1, R.drawable.banner2, R.drawable.banner3};
     ProgressDialog pd;
-    ArrayList<Produk> mItems = new ArrayList<>();
+    public static ArrayList<Produk> mItems = new ArrayList<>();
     private ProdukAdapter produkadapter;
-    private CartAdapter cartAdapter;
+    public static CartAdapter cartAdapter;
     RecyclerView mRecyclerview;
     RecyclerView cartRecycler;
 
@@ -70,12 +70,16 @@ public class MainActivity extends AppCompatActivity implements ProdukAdapter.Ite
     BottomSheetBehavior bottomSheetBehavior;
 
     MaterialButton btn_checkout, btn_clearcart;
-    ArrayList<Produk> cart = new ArrayList<>();
+    public static ArrayList<Produk> cart = new ArrayList<>();
+
+    public static TextView txtTot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
 
         sharedpreferences = getSharedPreferences(LoginActivity.my_shared_preferences, Context.MODE_PRIVATE);
         username = getIntent().getStringExtra(TAG_USERNAME);
@@ -93,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements ProdukAdapter.Ite
 
         mRecyclerview = (RecyclerView) findViewById(R.id.recycler_view);
         mRecyclerview.setHasFixedSize(true);
-        cartRecycler = (RecyclerView) findViewById(R.id.rc_cart);
+        cartRecycler = (RecyclerView) findViewById(R.id.rc_cart2);
         cartRecycler.setHasFixedSize(true);
 
         //mengambil data dari API
@@ -109,7 +113,6 @@ public class MainActivity extends AppCompatActivity implements ProdukAdapter.Ite
         cartRecycler.setLayoutManager(new LinearLayoutManager(this));
         cartAdapter = new CartAdapter(cart);
         cartRecycler.setAdapter(cartAdapter);
-        produkadapter.setClickListener(this);
 
         btn_checkout = findViewById(R.id.btn_checkout);
         btn_clearcart = findViewById(R.id.btn_clearcart);
@@ -131,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements ProdukAdapter.Ite
                 if(cart.isEmpty()){
                     Toast.makeText(MainActivity.this,"Pilih barang terlebih dahulu", Toast.LENGTH_LONG).show();
                 }else{
-                    transaksi();
+                    startActivity(new Intent(MainActivity.this, OngkirActivity.class));
                 }
             }
         });
@@ -202,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements ProdukAdapter.Ite
     public void getTotal()
     {
         int tot=0;
-        TextView txtTot=(TextView) findViewById(R.id.totalHarga);
+        txtTot=(TextView) findViewById(R.id.totalHarga);
         DecimalFormat decimalFormat = new DecimalFormat("#,##0");
         for(int i=0; i<cart.size();i++){
             tot += (cart.get(i).getHarga() * cart.get(i).getJmlBeli());
@@ -228,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements ProdukAdapter.Ite
                     return;
                 default:
                     Intent intent = new Intent(MainActivity.this, DetailProdukActivity.class);
-                    intent.putExtra("gambar", produk.getImgName());
+                    intent.putExtra("gambar", produk.getImg());
                     intent.putExtra("nama", produk.getNama());
                     intent.putExtra("harga", produk.getHarga());
                     intent.putExtra("stok", produk.getStok());
@@ -239,97 +242,18 @@ public class MainActivity extends AppCompatActivity implements ProdukAdapter.Ite
             }
     }
 
-    public void transaksi(){
-        pd.setMessage("Proses Checkout");
-        pd.setCancelable(false);
-        pd.show();
-        StringRequest strReq = new
-                StringRequest(Request.Method.POST, ServerAPI.URL_JUAL,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            pd.cancel();
-                            try {
-                                JSONObject res = new JSONObject(response);
-                                for (int i = 0; i < cart.size();i++) {
-                                    createDetailJual(res.getString("no_nota"), cart.get(i).getKode(), String.valueOf(cart.get(i).getHarga()), String.valueOf(cart.get(i).getJmlBeli()));
-                                }
-                                toast.setText(res.getString("message"));
-                                toast.show();
-                                cart.clear();
-                                cartAdapter.notifyDataSetChanged();
-                                getTotal();
-                                for(int i=0; i< mItems.size(); i++ ){
-                                    mItems.get(i).setJmlBeli(0);
-                                }
-                            } catch (JSONException e) {
-                                    e.printStackTrace();
-                            }
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            pd.cancel();
-                            toast.setText("Gagal Checkout");
-                            toast.show();
-                        }
-                    }) {
-                    @Override
-                    protected Map<String, String> getParams() {
-                        // Posting parameters to nota
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("username", username);
-
-                        double total = 0;
-                        for(int i=0; i<cart.size();i++){total += (cart.get(i).getHarga() * cart.get(i).getJmlBeli());}
-                        params.put("total", Double.toString(total));
-                        return params;
-                    }
-                };
-        com.kencana.kampunganggrek.Util.AppController.getInstance().addToRequestQueue(strReq);
-    };
-
-    private void createDetailJual(final String no_nota, final String kode, final String harga, final String jumlah) {
-
-        StringRequest strReq = new
-                StringRequest(Request.Method.POST, ServerAPI.URL_DETAILJUAL,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                try {
-                                    JSONObject res = new JSONObject(response);
-                                    Log.d("kode", res.getString("message"));
-                                    Log.d("kode", res.getString("query"));
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                            }
-                        }) {
-                    @Override
-                    protected Map<String, String> getParams() {
-                        // Posting parameters to detail nota
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("no_nota", no_nota);
-                        params.put("kode", kode);
-                        params.put("harga", harga);
-                        params.put("jumlah", jumlah);
-                        return params;
-                    }
-                };
-        com.kencana.kampunganggrek.Util.AppController.getInstance().addToRequestQueue(strReq);
-    }
 
     //fungsi untuk tombol menu
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
+            case R.id.action_profile:
+                startActivity(new Intent(MainActivity.this,UpdateUserActivity.class));
+                return true;
+            case R.id.action_history:
+                startActivity(new Intent(MainActivity.this,HistoryActivity.class));
+                return true;
             case R.id.action_call_center:
                 Intent intent = new Intent(Intent.ACTION_DIAL);
                 intent.setData(Uri.parse("tel:085155057752"));
@@ -346,9 +270,6 @@ public class MainActivity extends AppCompatActivity implements ProdukAdapter.Ite
                 if (mapIntent.resolveActivity(getPackageManager()) != null) {
                     startActivity(mapIntent);
                 }
-                return true;
-            case R.id.action_profile:
-                startActivity(new Intent(MainActivity.this,UpdateUserActivity.class));
                 return true;
             case R.id.action_logout:
                 SharedPreferences.Editor editor = sharedpreferences.edit();

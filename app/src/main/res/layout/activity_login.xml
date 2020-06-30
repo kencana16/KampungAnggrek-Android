@@ -93,7 +93,8 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:layout_marginTop="15dp">
-            <androidx.appcompat.widget.AppCompatImageButton
+            <com.facebook.login.widget.LoginButton
+                android:id="@+id/button_signinFacebook"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginEnd="15dp"
@@ -102,6 +103,7 @@
                 android:scaleType="fitXY"
                 android:background="@drawable/bg_circle_shadow"/>
             <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/button_signinGoogle"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:src="@drawable/ic_google__24"

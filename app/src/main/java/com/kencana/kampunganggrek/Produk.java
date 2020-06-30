@@ -1,5 +1,7 @@
 package com.kencana.kampunganggrek;
 
+import static com.kencana.kampunganggrek.Util.ServerAPI.URL;
+
 public class Produk {
     private String kode;
     private String nama;
@@ -94,7 +96,7 @@ public class Produk {
         this.img = img;
     }
 
-    public String getImg() { return "https://kampung-anggrek.000webhostapp.com/assets/images/"+img;  }
+    public String getImg() { return URL+"/assets/images/"+img;  }
     public String getImgName() { return img;  }
 
     public String toString(){

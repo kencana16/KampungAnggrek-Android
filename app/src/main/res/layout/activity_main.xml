@@ -42,7 +42,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="50dp"
-        tools:listitem="@layout/list_item"
+        tools:listitem="@layout/item_list"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="2"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
@@ -98,10 +98,10 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:paddingTop="10dp"
                     android:paddingBottom="60dp"
-                    android:id="@+id/rc_cart"
+                    android:id="@+id/rc_cart2"
                     android:layout_width="match_parent"
                     android:layout_height="fill_parent"
-                    tools:listitem="@layout/cart_item"
+                    tools:listitem="@layout/item_cart"
                     app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
                 <LinearLayout
                     android:layout_width="match_parent"

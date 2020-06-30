@@ -61,7 +61,7 @@ public class DetailProdukActivity extends AppCompatActivity {
         tv_hargaBarang_detail.setText("Rp. "+nf.format(harga));
         tv_deskripsi_detail.setText(deskripsi);
         Glide.with(DetailProdukActivity.this) //konteks bisa didapat dari activity yang sedang berjalan
-                .load("https://kampung-anggrek.000webhostapp.com/assets/images/"+gambar) // mengambil data dengan cara "list.get(position)" mendapatkan isi berupa objek Menu. kemudian "Menu.geturlGambar"
+                .load(gambar) // mengambil data dengan cara "list.get(position)" mendapatkan isi berupa objek Menu. kemudian "Menu.geturlGambar"
                 .thumbnail(0.5f) // resize gambar menjadi setengahnya
                 .into(iv_gambar_detail); // mengisikan ke imageView
 
